@@ -3,95 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LoveConnect - Register</title>
+    <title>LoveConnect - Create Account</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root{--primary:#ff3366;--primary-dark:#e6004d;--secondary:#6c63ff;--dark:#1a1a2e;--gray:#8892a4;--light-bg:#f7f8fc;--success:#10b981;--danger:#ef4444}
         *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Poppins',sans-serif;min-height:100vh;background:#fff;display:flex;flex-direction:column}
-        .header-section{background:linear-gradient(135deg,#e91e63 0%,#ff5252 30%,#ff8a80 60%,#fce4ec 100%);padding:40px 20px 70px;text-align:center;position:relative;border-radius:0 0 50% 50%/0 0 15% 15%}
-        .header-section::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:50px;background:white;border-radius:50% 50% 0 0}
-        .app-logo{width:80px;height:80px;background:white;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 30px rgba(233,30,99,0.3);position:relative;z-index:2}
-        .app-logo i{font-size:2.2rem;color:#e91e63}
-        .app-title{font-size:1.6rem;font-weight:800;color:white;letter-spacing:2px;position:relative;z-index:2}
-        .app-subtitle{color:rgba(255,255,255,0.9);font-size:0.85rem;position:relative;z-index:2}
-        .form-section{flex:1;padding:20px 25px 30px;max-width:500px;margin:0 auto;width:100%}
-        .input-group-custom{position:relative;margin-bottom:14px}
-        .input-group-custom .input-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#999;font-size:1.1rem;z-index:3}
-        .input-group-custom .form-control,.input-group-custom .form-select{padding:14px 18px 14px 48px;border-radius:12px;border:2px solid #e8e8e8;font-size:0.95rem;background:#f8f9fa;transition:all 0.3s}
-        .input-group-custom .form-control:focus,.input-group-custom .form-select:focus{border-color:#e91e63;background:white;box-shadow:0 0 0 4px rgba(233,30,99,0.08)}
-        .btn-register-submit{width:100%;padding:16px;border-radius:12px;font-size:1.1rem;font-weight:700;border:none;background:linear-gradient(135deg,#4caf50,#66bb6a);color:white;margin-bottom:12px;transition:all 0.3s;box-shadow:0 4px 20px rgba(76,175,80,0.3)}
-        .btn-register-submit:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(76,175,80,0.4);color:white}
-        .btn-back-login{width:100%;padding:16px;border-radius:12px;font-size:1rem;font-weight:600;border:2px solid #e91e63;background:white;color:#e91e63;transition:all 0.3s;display:block;text-align:center;text-decoration:none}
-        .btn-back-login:hover{background:#e91e63;color:white}
-        .section-title{font-weight:700;color:#333;font-size:0.85rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;margin-top:15px}
-        .footer-section{text-align:center;padding:15px;background:linear-gradient(135deg,#e91e63,#c2185b);color:white;margin-top:auto}
-        .footer-section p{margin:0;font-size:0.8rem;opacity:0.9}
-        .alert{border-radius:12px;border:none;font-size:0.9rem}
+        body{font-family:'Inter',sans-serif;background:var(--light-bg);min-height:100vh}
+        .register-page{max-width:480px;margin:0 auto;padding:20px}
+        .brand-header{text-align:center;padding:30px 0 20px}
+        .brand-header .logo{width:50px;height:50px;background:var(--primary);border-radius:14px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:10px}
+        .brand-header .logo i{font-size:1.5rem;color:white}
+        .brand-header h1{font-size:1.4rem;font-weight:800;color:var(--dark)}
+        .brand-header p{color:var(--gray);font-size:0.85rem;margin-top:4px}
+        .form-card{background:white;border-radius:20px;padding:28px 24px;box-shadow:0 2px 20px rgba(0,0,0,0.04)}
+        .section-label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--gray);margin-bottom:12px;margin-top:18px}
+        .section-label:first-child{margin-top:0}
+        .form-field{margin-bottom:16px;position:relative}
+        .form-field label{display:block;font-size:0.8rem;font-weight:600;color:var(--dark);margin-bottom:6px}
+        .form-field .input-wrap{position:relative}
+        .form-field .input-wrap i.field-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--gray);font-size:1rem}
+        .form-field input,.form-field select,.form-field textarea{width:100%;padding:12px 14px 12px 42px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.9rem;font-family:'Inter',sans-serif;transition:all 0.2s;background:white;outline:none}
+        .form-field select{padding-left:42px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%238892a4' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:12px}
+        .form-field textarea{padding-left:42px;resize:none;min-height:70px}
+        .form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(255,51,102,0.08)}
+        .form-field.has-error input,.form-field.has-error select{border-color:var(--danger);background:#fef2f2}
+        .form-field.has-error input:focus,.form-field.has-error select:focus{box-shadow:0 0 0 3px rgba(239,68,68,0.1)}
+        .form-field.has-success input,.form-field.has-success select{border-color:var(--success);background:#f0fdf4}
+        .form-field .field-error{display:none;font-size:0.75rem;color:var(--danger);margin-top:5px;font-weight:500;padding-left:2px}
+        .form-field .field-error i{margin-right:3px}
+        .form-field.has-error .field-error{display:block}
+        .form-field .field-success{display:none;font-size:0.75rem;color:var(--success);margin-top:5px;font-weight:500;padding-left:2px}
+        .form-field.has-success .field-success{display:block}
+        .form-field .status-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:1rem;display:none}
+        .form-field.has-error .status-icon.error-icon{display:block;color:var(--danger)}
+        .form-field.has-success .status-icon.success-icon{display:block;color:var(--success)}
+        .row-fields{display:flex;gap:12px}
+        .row-fields .form-field{flex:1}
+        .btn-submit{width:100%;padding:14px;border:none;border-radius:12px;font-size:1rem;font-weight:700;color:white;background:linear-gradient(135deg,var(--primary),var(--secondary));cursor:pointer;transition:all 0.3s;margin-top:24px}
+        .btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(255,51,102,0.3)}
+        .btn-submit:active{transform:translateY(0)}
+        .btn-submit:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+        .login-link{text-align:center;margin-top:20px;font-size:0.85rem;color:var(--gray)}
+        .login-link a{color:var(--primary);text-decoration:none;font-weight:600}
+        .success-msg{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 18px;margin-bottom:18px;font-size:0.85rem;color:#166534;display:flex;align-items:center;gap:8px}
+        .password-strength{height:4px;border-radius:2px;margin-top:6px;background:#e2e8f0;overflow:hidden}
+        .password-strength .bar{height:100%;border-radius:2px;transition:all 0.3s}
+        .pw-weak{width:33%;background:var(--danger)}
+        .pw-medium{width:66%;background:#f59e0b}
+        .pw-strong{width:100%;background:var(--success)}
     </style>
 </head>
 <body>
-    <div class="header-section">
-        <div class="app-logo"><i class="bi bi-heart-fill"></i></div>
-        <h1 class="app-title">LOVECONNECT</h1>
-        <p class="app-subtitle">Create Your Account</p>
-    </div>
-    <div class="form-section">
-        <% if (error) { %><div class="alert alert-danger"><i class="bi bi-exclamation-circle me-2"></i><%= error %></div><% } %>
-        <% if (success) { %><div class="alert alert-success"><i class="bi bi-check-circle me-2"></i><%= success %> <a href="/login">Login now</a></div><% } %>
-        <form method="POST" action="/register">
-            <p class="section-title"><i class="bi bi-person me-1"></i> Personal Info</p>
-            <div class="input-group-custom">
-                <i class="bi bi-person-fill input-icon"></i>
-                <input type="text" name="name" class="form-control" placeholder="Full Name" required>
-            </div>
-            <div class="input-group-custom">
-                <i class="bi bi-envelope-fill input-icon"></i>
-                <input type="email" name="email" class="form-control" placeholder="Email Address" required>
-            </div>
-            <div class="row g-2">
-                <div class="col-6">
-                    <div class="input-group-custom">
-                        <i class="bi bi-gender-ambiguous input-icon"></i>
-                        <select name="gender" class="form-select" required style="padding-left:48px">
-                            <option value="">Gender</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="other">Other</option>
-                        </select>
+    <div class="register-page">
+        <div class="brand-header">
+            <div class="logo"><i class="bi bi-heart-fill"></i></div>
+            <h1>Create Account</h1>
+            <p>Join LoveConnect and find your match</p>
+        </div>
+
+        <div class="form-card">
+            <% if (success) { %>
+                <div class="success-msg"><i class="bi bi-check-circle-fill"></i><span><%= success %> <a href="/login">Login now</a></span></div>
+            <% } %>
+
+            <form method="POST" action="/register" id="registerForm" novalidate>
+                <div class="section-label">Personal Information</div>
+
+                <div class="form-field" id="field-name">
+                    <label>Full Name</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-person field-icon"></i>
+                        <input type="text" name="name" id="input-name" placeholder="Enter your full name" value="<%= values.name || '' %>" autocomplete="name">
+                        <i class="bi bi-x-circle-fill status-icon error-icon"></i>
+                        <i class="bi bi-check-circle-fill status-icon success-icon"></i>
+                    </div>
+                    <div class="field-error"><i class="bi bi-exclamation-circle"></i><span><%= errors.name || '' %></span></div>
+                    <div class="field-success"><i class="bi bi-check-circle"></i><span>Username available</span></div>
+                </div>
+
+                <div class="form-field" id="field-email">
+                    <label>Email Address</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-envelope field-icon"></i>
+                        <input type="email" name="email" id="input-email" placeholder="you@example.com" value="<%= values.email || '' %>" autocomplete="email">
+                        <i class="bi bi-x-circle-fill status-icon error-icon"></i>
+                        <i class="bi bi-check-circle-fill status-icon success-icon"></i>
+                    </div>
+                    <div class="field-error"><i class="bi bi-exclamation-circle"></i><span><%= errors.email || '' %></span></div>
+                    <div class="field-success"><i class="bi bi-check-circle"></i><span>Email available</span></div>
+                </div>
+
+                <div class="row-fields">
+                    <div class="form-field" id="field-gender">
+                        <label>Gender</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-gender-ambiguous field-icon"></i>
+                            <select name="gender" id="input-gender">
+                                <option value="">Select</option>
+                                <option value="male" <%= (values.gender||'')==='male'?'selected':'' %>>Male</option>
+                                <option value="female" <%= (values.gender||'')==='female'?'selected':'' %>>Female</option>
+                                <option value="other" <%= (values.gender||'')==='other'?'selected':'' %>>Other</option>
+                            </select>
+                            <i class="bi bi-x-circle-fill status-icon error-icon"></i>
+                        </div>
+                        <div class="field-error"><i class="bi bi-exclamation-circle"></i><span><%= errors.gender || '' %></span></div>
+                    </div>
+                    <div class="form-field" id="field-age">
+                        <label>Age</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-calendar3 field-icon"></i>
+                            <input type="number" name="age" id="input-age" placeholder="18+" min="18" max="100" value="<%= values.age || '' %>">
+                            <i class="bi bi-x-circle-fill status-icon error-icon"></i>
+                        </div>
+                        <div class="field-error"><i class="bi bi-exclamation-circle"></i><span><%= errors.age || '' %></span></div>
                     </div>
                 </div>
-                <div class="col-6">
-                    <div class="input-group-custom">
-                        <i class="bi bi-calendar-fill input-icon"></i>
-                        <input type="number" name="age" class="form-control" placeholder="Age (18+)" min="18" max="100" required>
+
+                <div class="form-field" id="field-bio">
+                    <label>Bio <span style="font-weight:400;color:var(--gray)">(optional)</span></label>
+                    <div class="input-wrap">
+                        <i class="bi bi-chat-text field-icon" style="top:25%"></i>
+                        <textarea name="bio" placeholder="Tell others about yourself..."><%= values.bio || '' %></textarea>
                     </div>
                 </div>
-            </div>
-            <div class="input-group-custom">
-                <i class="bi bi-chat-quote-fill input-icon" style="top:30%"></i>
-                <textarea name="bio" class="form-control" placeholder="Tell us about yourself..." rows="2" style="padding-top:14px"></textarea>
-            </div>
-            <p class="section-title"><i class="bi bi-shield-lock me-1"></i> Security</p>
-            <div class="input-group-custom">
-                <i class="bi bi-lock-fill input-icon"></i>
-                <input type="password" name="password" class="form-control" placeholder="Password (min 6 chars)" required>
-            </div>
-            <div class="input-group-custom">
-                <i class="bi bi-lock-fill input-icon"></i>
-                <input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" required>
-            </div>
-            <input type="hidden" name="latitude" id="latitude">
-            <input type="hidden" name="longitude" id="longitude">
-            <button type="submit" class="btn btn-register-submit mt-2"><i class="bi bi-heart-fill me-2"></i>Create Account</button>
-            <a href="/login" class="btn-back-login"><i class="bi bi-arrow-left me-2"></i>Back to Login</a>
-        </form>
+
+                <div class="section-label">Security</div>
+
+                <div class="form-field" id="field-password">
+                    <label>Password</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-lock field-icon"></i>
+                        <input type="password" name="password" id="input-password" placeholder="Minimum 6 characters" autocomplete="new-password">
+                        <i class="bi bi-x-circle-fill status-icon error-icon"></i>
+                        <i class="bi bi-check-circle-fill status-icon success-icon"></i>
+                    </div>
+                    <div class="password-strength"><div class="bar" id="pw-bar"></div></div>
+                    <div class="field-error"><i class="bi bi-exclamation-circle"></i><span><%= errors.password || '' %></span></div>
+                </div>
+
+                <div class="form-field" id="field-confirm">
+                    <label>Confirm Password</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-lock field-icon"></i>
+                        <input type="password" name="confirm_password" id="input-confirm" placeholder="Re-enter password" autocomplete="new-password">
+                        <i class="bi bi-x-circle-fill status-icon error-icon"></i>
+                        <i class="bi bi-check-circle-fill status-icon success-icon"></i>
+                    </div>
+                    <div class="field-error"><i class="bi bi-exclamation-circle"></i><span><%= errors.confirm_password || '' %></span></div>
+                </div>
+
+                <input type="hidden" name="latitude" id="latitude">
+                <input type="hidden" name="longitude" id="longitude">
+
+                <button type="submit" class="btn-submit" id="submitBtn">Create My Account</button>
+            </form>
+
+            <div class="login-link">Already have an account? <a href="/login">Sign In</a></div>
+        </div>
     </div>
-    <div class="footer-section">
-        <p>By registering, you agree to our Terms of Use</p>
-        <p class="mt-1">Version 1.0.0</p>
-    </div>
-    <script>if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){document.getElementById('latitude').value=p.coords.latitude;document.getElementById('longitude').value=p.coords.longitude})}</script>
+
+    <script>
+    // Geolocation
+    if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){document.getElementById('latitude').value=p.coords.latitude;document.getElementById('longitude').value=p.coords.longitude})}
+
+    // Validation helpers
+    function setError(fieldId, msg) {
+        const f = document.getElementById(fieldId);
+        f.classList.add('has-error');
+        f.classList.remove('has-success');
+        f.querySelector('.field-error span').textContent = msg;
+    }
+    function setSuccess(fieldId, msg) {
+        const f = document.getElementById(fieldId);
+        f.classList.remove('has-error');
+        f.classList.add('has-success');
+        const s = f.querySelector('.field-success');
+        if (s) s.querySelector('span').textContent = msg || 'Looks good!';
+    }
+    function clearField(fieldId) {
+        const f = document.getElementById(fieldId);
+        f.classList.remove('has-error','has-success');
+    }
+
+    // Debounce
+    let nameTimer, emailTimer;
+
+    // Name validation (real-time)
+    document.getElementById('input-name').addEventListener('input', function() {
+        clearTimeout(nameTimer);
+        const val = this.value.trim();
+        if (val.length === 0) { clearField('field-name'); return; }
+        if (val.length < 2) { setError('field-name', 'Name must be at least 2 characters.'); return; }
+        nameTimer = setTimeout(() => {
+            fetch('/api/check-name', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:val})})
+            .then(r=>r.json()).then(data=>{
+                if(data.available){setSuccess('field-name','Username available')}
+                else{setError('field-name','This username is already taken.')}
+            });
+        }, 500);
+    });
+
+    // Email validation (real-time)
+    document.getElementById('input-email').addEventListener('input', function() {
+        clearTimeout(emailTimer);
+        const val = this.value.trim();
+        if (val.length === 0) { clearField('field-email'); return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { setError('field-email', 'Please enter a valid email address.'); return; }
+        emailTimer = setTimeout(() => {
+            fetch('/api/check-email', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:val})})
+            .then(r=>r.json()).then(data=>{
+                if(data.available){setSuccess('field-email','Email available')}
+                else{setError('field-email','This email is already registered. Try logging in.')}
+            });
+        }, 500);
+    });
+
+    // Password strength
+    document.getElementById('input-password').addEventListener('input', function() {
+        const val = this.value;
+        const bar = document.getElementById('pw-bar');
+        if (val.length === 0) { bar.className='bar'; bar.style.width='0'; clearField('field-password'); return; }
+        if (val.length < 6) { bar.className='bar pw-weak'; setError('field-password','Password must be at least 6 characters.'); }
+        else if (val.length < 10) { bar.className='bar pw-medium'; setSuccess('field-password'); }
+        else { bar.className='bar pw-strong'; setSuccess('field-password'); }
+    });
+
+    // Confirm password
+    document.getElementById('input-confirm').addEventListener('input', function() {
+        const pw = document.getElementById('input-password').value;
+        if (this.value.length === 0) { clearField('field-confirm'); return; }
+        if (this.value !== pw) { setError('field-confirm', 'Passwords do not match.'); }
+        else { setSuccess('field-confirm'); }
+    });
+
+    // Age validation
+    document.getElementById('input-age').addEventListener('input', function() {
+        const val = parseInt(this.value);
+        if (!this.value) { clearField('field-age'); return; }
+        if (val < 18) { setError('field-age', 'You must be at least 18 years old.'); }
+        else if (val > 100) { setError('field-age', 'Please enter a valid age.'); }
+        else { clearField('field-age'); }
+    });
+
+    // Gender validation
+    document.getElementById('input-gender').addEventListener('change', function() {
+        if (!this.value) { setError('field-gender', 'Please select your gender.'); }
+        else { clearField('field-gender'); }
+    });
+
+    // Form submit validation
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        let valid = true;
+        const name = document.getElementById('input-name').value.trim();
+        const email = document.getElementById('input-email').value.trim();
+        const password = document.getElementById('input-password').value;
+        const confirm = document.getElementById('input-confirm').value;
+        const gender = document.getElementById('input-gender').value;
+        const age = document.getElementById('input-age').value;
+
+        if (name.length < 2) { setError('field-name','Name must be at least 2 characters.'); valid=false; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('field-email','Please enter a valid email address.'); valid=false; }
+        if (password.length < 6) { setError('field-password','Password must be at least 6 characters.'); valid=false; }
+        if (password !== confirm) { setError('field-confirm','Passwords do not match.'); valid=false; }
+        if (!gender) { setError('field-gender','Please select your gender.'); valid=false; }
+        if (!age || parseInt(age)<18) { setError('field-age','You must be at least 18 years old.'); valid=false; }
+
+        // Check if any field has error status
+        if (document.querySelectorAll('.form-field.has-error').length > 0) valid = false;
+
+        if (!valid) e.preventDefault();
+    });
+
+    // Apply server-side errors on load
+    <% if (Object.keys(errors).length > 0) { %>
+        <% if (errors.name) { %>setError('field-name','<%= errors.name %>');<% } %>
+        <% if (errors.email) { %>setError('field-email','<%= errors.email %>');<% } %>
+        <% if (errors.password) { %>setError('field-password','<%= errors.password %>');<% } %>
+        <% if (errors.confirm_password) { %>setError('field-confirm','<%= errors.confirm_password %>');<% } %>
+        <% if (errors.gender) { %>setError('field-gender','<%= errors.gender %>');<% } %>
+        <% if (errors.age) { %>setError('field-age','<%= errors.age %>');<% } %>
+    <% } %>
+    </script>
 </body>
 </html>

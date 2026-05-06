@@ -1,8 +1,8 @@
 const express = require('express');
-const session = require('express-session');
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const path = require('path');
-const { getDB, calculateDistance } = require('./db');
+const { db, calculateDistance } = require('./db');
 
 const app = express();
 
@@ -12,11 +12,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use('/public', express.static(path.join(__dirname, '..', 'public')));
 
-app.use(session({
-    secret: 'loveconnect-secret-key-2024',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 }
+app.set('trust proxy', 1);
+app.use(cookieSession({
+    name: 'lc_session',
+    keys: ['loveconnect-key-1-xyz', 'loveconnect-key-2-abc'],
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    sameSite: 'lax',
+    secure: false
 }));
 
 // Middleware
@@ -36,184 +38,148 @@ function requireAdmin(req, res, next) {
     next();
 }
 
-// HOME
+// ============ VALIDATION API ============
+app.post('/api/check-email', (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.json({ available: true });
+    const user = db.findUser({ emailLower: email.trim().toLowerCase() });
+    res.json({ available: !user });
+});
+
+app.post('/api/check-name', (req, res) => {
+    const { name } = req.body;
+    if (!name) return res.json({ available: true });
+    const user = db.findUser({ nameLower: name.trim().toLowerCase() });
+    res.json({ available: !user });
+});
+
+// ============ HOME ============
 app.get('/', (req, res) => {
     if (req.session.user) return res.redirect('/dashboard');
     res.render('index');
 });
 
-// LOGIN
+// ============ LOGIN ============
 app.get('/login', (req, res) => {
     if (req.session.user) return res.redirect('/dashboard');
     res.render('login', { error: null });
 });
 
-app.post('/login', async (req, res) => {
+app.post('/login', (req, res) => {
     const { email, password } = req.body;
-    const db = await getDB();
-    const result = db.exec("SELECT * FROM users WHERE email = ?", [email]);
+    if (!email || !password) {
+        return res.render('login', { error: 'Please enter email and password.' });
+    }
     
-    if (result.length > 0 && result[0].values.length > 0) {
-        const cols = result[0].columns;
-        const row = result[0].values[0];
-        const user = {};
-        cols.forEach((col, i) => user[col] = row[i]);
-        
-        if (bcrypt.compareSync(password, user.password)) {
-            req.session.user = { id: user.id, name: user.name, email: user.email, account_type: user.account_type };
-            return res.redirect('/dashboard');
-        }
+    const user = db.findUser({ email: email.trim() });
+    if (user && bcrypt.compareSync(password, user.password)) {
+        req.session.user = { id: user.id, name: user.name, email: user.email, account_type: user.account_type };
+        return res.redirect('/dashboard');
     }
     res.render('login', { error: 'Invalid email or password.' });
 });
 
-// REGISTER
+// ============ REGISTER ============
 app.get('/register', (req, res) => {
     if (req.session.user) return res.redirect('/dashboard');
-    res.render('register', { error: null, success: null });
+    res.render('register', { errors: {}, values: {}, success: null });
 });
 
-app.post('/register', async (req, res) => {
+app.post('/register', (req, res) => {
     const { name, email, password, confirm_password, gender, age, bio, latitude, longitude } = req.body;
+    const errors = {};
+    const values = { name, email, gender, age, bio };
     
-    if (!name || !email || !password || !gender || !age || parseInt(age) < 18) {
-        return res.render('register', { error: 'Please fill all required fields. Must be 18+.', success: null });
+    if (!name || name.trim().length < 2) errors.name = 'Name must be at least 2 characters.';
+    if (!email) errors.email = 'Email is required.';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = 'Please enter a valid email address.';
+    if (!password) errors.password = 'Password is required.';
+    else if (password.length < 6) errors.password = 'Password must be at least 6 characters.';
+    if (password && password !== confirm_password) errors.confirm_password = 'Passwords do not match.';
+    if (!gender) errors.gender = 'Please select your gender.';
+    if (!age) errors.age = 'Age is required.';
+    else if (parseInt(age) < 18) errors.age = 'You must be at least 18 years old.';
+    else if (parseInt(age) > 100) errors.age = 'Please enter a valid age.';
+    
+    if (!errors.email) {
+        const existing = db.findUser({ emailLower: email.trim().toLowerCase() });
+        if (existing) errors.email = 'This email is already registered. Try logging in.';
     }
-    if (password !== confirm_password) {
-        return res.render('register', { error: 'Passwords do not match.', success: null });
-    }
-    if (password.length < 6) {
-        return res.render('register', { error: 'Password must be at least 6 characters.', success: null });
+    if (!errors.name) {
+        const existing = db.findUser({ nameLower: name.trim().toLowerCase() });
+        if (existing) errors.name = 'This username is already taken. Try another one.';
     }
     
-    const db = await getDB();
-    const existing = db.exec("SELECT id FROM users WHERE email = ?", [email]);
-    if (existing.length > 0 && existing[0].values.length > 0) {
-        return res.render('register', { error: 'Email already registered.', success: null });
+    if (Object.keys(errors).length > 0) {
+        return res.render('register', { errors, values, success: null });
     }
     
-    const hashedPw = bcrypt.hashSync(password, 10);
-    db.run("INSERT INTO users (name, email, password, gender, age, bio, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        [name, email, hashedPw, gender, parseInt(age), bio || '', parseFloat(latitude) || null, parseFloat(longitude) || null]);
+    const hashedPw = bcrypt.hashSync(password, 4);
+    db.createUser({
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        password: hashedPw,
+        gender,
+        age: parseInt(age),
+        bio: bio || '',
+        latitude: parseFloat(latitude) || null,
+        longitude: parseFloat(longitude) || null
+    });
     
-    res.render('register', { error: null, success: 'Registration successful! You can now login.' });
+    res.render('register', { errors: {}, values: {}, success: 'Account created successfully! You can now login.' });
 });
 
-// LOGOUT
+// ============ LOGOUT ============
 app.get('/logout', (req, res) => {
-    req.session.destroy();
+    req.session = null;
     res.redirect('/login');
 });
 
-// DASHBOARD
-app.get('/dashboard', requireLogin, async (req, res) => {
-    const db = await getDB();
-    const currentResult = db.exec("SELECT * FROM users WHERE id = ?", [req.session.user.id]);
-    let currentUser = {};
-    if (currentResult.length > 0) {
-        const cols = currentResult[0].columns;
-        const row = currentResult[0].values[0];
-        cols.forEach((col, i) => currentUser[col] = row[i]);
-    }
-    
-    const usersResult = db.exec("SELECT * FROM users WHERE id != ? AND email != 'Romar' ORDER BY created_at DESC", [req.session.user.id]);
-    let users = [];
-    if (usersResult.length > 0) {
-        const cols = usersResult[0].columns;
-        users = usersResult[0].values.map(row => {
-            const u = {};
-            cols.forEach((col, i) => u[col] = row[i]);
-            u.distance = calculateDistance(currentUser.latitude, currentUser.longitude, u.latitude, u.longitude);
-            return u;
-        });
-    }
-    
-    res.render('dashboard', { currentUser, users });
+// ============ DASHBOARD ============
+app.get('/dashboard', requireLogin, (req, res) => {
+    const currentUser = db.findUser({ id: req.session.user.id });
+    const allUsers = db.getAllUsers(req.session.user.id);
+    const users = allUsers.map(u => ({
+        ...u,
+        distance: calculateDistance(currentUser ? currentUser.latitude : null, currentUser ? currentUser.longitude : null, u.latitude, u.longitude)
+    }));
+    res.render('dashboard', { currentUser: currentUser || req.session.user, users });
 });
 
-// PROFILE
-app.get('/profile', requireLogin, async (req, res) => {
-    const db = await getDB();
-    const result = db.exec("SELECT * FROM users WHERE id = ?", [req.session.user.id]);
-    let user = {};
-    if (result.length > 0) {
-        const cols = result[0].columns;
-        const row = result[0].values[0];
-        cols.forEach((col, i) => user[col] = row[i]);
-    }
-    res.render('profile', { user, error: null, success: null });
+// ============ PROFILE ============
+app.get('/profile', requireLogin, (req, res) => {
+    const user = db.findUser({ id: req.session.user.id });
+    res.render('profile', { user: user || req.session.user, error: null, success: null });
 });
 
-app.post('/profile', requireLogin, async (req, res) => {
+app.post('/profile', requireLogin, (req, res) => {
     const { name, age, gender, bio } = req.body;
-    const db = await getDB();
-    db.run("UPDATE users SET name = ?, age = ?, gender = ?, bio = ? WHERE id = ?",
-        [name, parseInt(age), gender, bio || '', req.session.user.id]);
+    db.updateUser(req.session.user.id, { name, age: parseInt(age), gender, bio: bio || '' });
     req.session.user.name = name;
-    
-    const result = db.exec("SELECT * FROM users WHERE id = ?", [req.session.user.id]);
-    let user = {};
-    if (result.length > 0) {
-        const cols = result[0].columns;
-        const row = result[0].values[0];
-        cols.forEach((col, i) => user[col] = row[i]);
-    }
-    res.render('profile', { user, error: null, success: 'Profile updated!' });
+    const user = db.findUser({ id: req.session.user.id });
+    res.render('profile', { user: user || req.session.user, error: null, success: 'Profile updated!' });
 });
 
-// CHAT
-app.get('/chat', requireLogin, async (req, res) => {
-    const db = await getDB();
+// ============ CHAT ============
+app.get('/chat', requireLogin, (req, res) => {
     const userId = req.session.user.id;
     const selectedUserId = parseInt(req.query.user) || 0;
     
-    // Get conversations
-    const convResult = db.exec(`
-        SELECT DISTINCT CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END as other_id
-        FROM messages WHERE sender_id = ? OR receiver_id = ?
-    `, [userId, userId, userId]);
-    
-    let convIds = convResult.length > 0 ? convResult[0].values.map(r => r[0]) : [];
+    let convIds = db.getConversationPartners(userId);
     if (selectedUserId && !convIds.includes(selectedUserId)) convIds.push(selectedUserId);
     
-    let conversations = [];
-    convIds.forEach(id => {
-        const uResult = db.exec("SELECT id, name, profile_photo, account_type FROM users WHERE id = ? AND email != 'Romar'", [id]);
-        if (uResult.length > 0 && uResult[0].values.length > 0) {
-            const cols = uResult[0].columns;
-            const row = uResult[0].values[0];
-            const u = {};
-            cols.forEach((col, i) => u[col] = row[i]);
-            
-            const lastMsg = db.exec("SELECT message, created_at FROM messages WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?) ORDER BY created_at DESC LIMIT 1",
-                [userId, id, id, userId]);
-            u.last_message = lastMsg.length > 0 && lastMsg[0].values.length > 0 ? lastMsg[0].values[0][0] : '';
-            u.last_time = lastMsg.length > 0 && lastMsg[0].values.length > 0 ? lastMsg[0].values[0][1] : '';
-            conversations.push(u);
-        }
-    });
+    const conversations = convIds.map(id => {
+        const u = db.findUser({ id });
+        if (!u || u.email === 'Romar') return null;
+        const lastMsg = db.getLastMessage(userId, id);
+        return { ...u, last_message: lastMsg ? lastMsg.message : '' };
+    }).filter(Boolean);
     
     let selectedUser = null;
     let messages = [];
     if (selectedUserId) {
-        const suResult = db.exec("SELECT * FROM users WHERE id = ?", [selectedUserId]);
-        if (suResult.length > 0 && suResult[0].values.length > 0) {
-            const cols = suResult[0].columns;
-            const row = suResult[0].values[0];
-            selectedUser = {};
-            cols.forEach((col, i) => selectedUser[col] = row[i]);
-        }
-        
-        const msgResult = db.exec("SELECT * FROM messages WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?) ORDER BY created_at ASC",
-            [userId, selectedUserId, selectedUserId, userId]);
-        if (msgResult.length > 0) {
-            const cols = msgResult[0].columns;
-            messages = msgResult[0].values.map(row => {
-                const m = {};
-                cols.forEach((col, i) => m[col] = row[i]);
-                return m;
-            });
-        }
+        selectedUser = db.findUser({ id: selectedUserId });
+        messages = db.getMessages(userId, selectedUserId);
     }
     
     const currentUser = req.session.user;
@@ -221,36 +187,29 @@ app.get('/chat', requireLogin, async (req, res) => {
     res.render('chat', { conversations, selectedUser, messages, currentUser, selectedUserId, showUpgradeModal });
 });
 
-app.post('/chat', requireLogin, async (req, res) => {
+app.post('/chat', requireLogin, (req, res) => {
     const { message, receiver_id } = req.body;
-    const userId = req.session.user.id;
-    const db = await getDB();
-    
     if (message && message.trim()) {
-        const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
-        db.run("INSERT INTO messages (sender_id, receiver_id, message, created_at) VALUES (?, ?, ?, ?)",
-            [userId, parseInt(receiver_id), message.trim(), now]);
+        db.sendMessage(req.session.user.id, parseInt(receiver_id), message.trim());
     }
     res.redirect('/chat?user=' + receiver_id);
 });
 
-// UPGRADE
+// ============ UPGRADE ============
 app.get('/upgrade', requireLogin, (req, res) => {
     res.render('upgrade', { currentUser: req.session.user });
 });
 
-// UPDATE LOCATION
-app.post('/update-location', requireLogin, async (req, res) => {
+// ============ UPDATE LOCATION ============
+app.post('/update-location', requireLogin, (req, res) => {
     const { latitude, longitude } = req.body;
     if (latitude && longitude) {
-        const db = await getDB();
-        db.run("UPDATE users SET latitude = ?, longitude = ? WHERE id = ?",
-            [parseFloat(latitude), parseFloat(longitude), req.session.user.id]);
+        db.updateUser(req.session.user.id, { latitude: parseFloat(latitude), longitude: parseFloat(longitude) });
     }
     res.json({ success: true });
 });
 
-// ADMIN LOGIN
+// ============ ADMIN LOGIN ============
 app.get('/admin/login', (req, res) => {
     if (req.session.isAdmin) return res.redirect('/admin/dashboard');
     res.render('admin_login', { error: null });
@@ -265,44 +224,27 @@ app.post('/admin/login', (req, res) => {
     res.render('admin_login', { error: 'Invalid admin credentials.' });
 });
 
-// ADMIN DASHBOARD
-app.get('/admin/dashboard', requireAdmin, async (req, res) => {
-    const db = await getDB();
-    const totalUsers = db.exec("SELECT COUNT(*) FROM users WHERE email != 'Romar'")[0].values[0][0];
-    const premiumUsers = db.exec("SELECT COUNT(*) FROM users WHERE account_type = 'premium' AND email != 'Romar'")[0].values[0][0];
-    const freeUsers = db.exec("SELECT COUNT(*) FROM users WHERE account_type = 'free' AND email != 'Romar'")[0].values[0][0];
-    const totalMessages = db.exec("SELECT COUNT(*) FROM messages")[0].values[0][0];
-    
-    const usersResult = db.exec("SELECT * FROM users WHERE email != 'Romar' ORDER BY created_at DESC");
-    let users = [];
-    if (usersResult.length > 0) {
-        const cols = usersResult[0].columns;
-        users = usersResult[0].values.map(row => {
-            const u = {};
-            cols.forEach((col, i) => u[col] = row[i]);
-            return u;
-        });
-    }
-    
-    res.render('admin_dashboard', { totalUsers, premiumUsers, freeUsers, totalMessages, users });
+// ============ ADMIN DASHBOARD ============
+app.get('/admin/dashboard', requireAdmin, (req, res) => {
+    const counts = db.countUsers();
+    const users = db.getAllUsersAdmin();
+    res.render('admin_dashboard', {
+        totalUsers: counts.total,
+        premiumUsers: counts.premium,
+        freeUsers: counts.free,
+        totalMessages: db.countMessages(),
+        users
+    });
 });
 
-app.post('/admin/action', requireAdmin, async (req, res) => {
+app.post('/admin/action', requireAdmin, (req, res) => {
     const { action, user_id } = req.body;
-    const db = await getDB();
-    
-    if (user_id) {
+    const id = parseInt(user_id);
+    if (id) {
         switch (action) {
-            case 'delete':
-                db.run("DELETE FROM messages WHERE sender_id = ? OR receiver_id = ?", [user_id, user_id]);
-                db.run("DELETE FROM users WHERE id = ? AND email != 'Romar'", [user_id]);
-                break;
-            case 'upgrade':
-                db.run("UPDATE users SET account_type = 'premium' WHERE id = ?", [user_id]);
-                break;
-            case 'downgrade':
-                db.run("UPDATE users SET account_type = 'free' WHERE id = ?", [user_id]);
-                break;
+            case 'delete': db.deleteUser(id); break;
+            case 'upgrade': db.upgradeUser(id); break;
+            case 'downgrade': db.downgradeUser(id); break;
         }
     }
     res.redirect('/admin/dashboard');
