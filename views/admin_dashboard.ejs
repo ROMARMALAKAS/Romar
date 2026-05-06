@@ -3,109 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - LoveConnect</title>
+    <title>Admin - LoveConnect</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body{font-family:'Poppins',sans-serif;background:#f8f9fa}
-        .navbar-admin{background:linear-gradient(135deg,#1a237e,#3949ab);box-shadow:0 2px 15px rgba(26,35,126,0.3)}
-        .navbar-admin .navbar-brand,.navbar-admin .nav-link{color:white!important;font-weight:600}
-        .stat-card{border:none;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.06);transition:all 0.3s}
-        .stat-card:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,0.1)}
-        .stat-icon{width:55px;height:55px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem}
-        .table-card{border:none;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.06)}
+        *{box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#fff;margin:0;padding-bottom:20px}
+        .top-header{background:#fff;padding:16px 20px;border-bottom:1px solid #f0f0f0;position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center}
+        .top-header h6{margin:0;font-weight:600;color:#333}
+        .top-header .btn-logout{font-size:0.8rem;color:#dc3545;text-decoration:none;font-weight:500}
+        .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:20px}
+        .stat-card{border:1px solid #f0f0f0;border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px}
+        .stat-card .icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+        .stat-card .icon.blue{background:#eff6ff;color:#2563eb}
+        .stat-card .icon.yellow{background:#fef3c7;color:#d97706}
+        .stat-card .icon.green{background:#ecfdf5;color:#059669}
+        .stat-card .icon.red{background:#fef2f2;color:#dc2626}
+        .stat-card .value{font-weight:700;font-size:1.2rem;color:#222;line-height:1}
+        .stat-card .label{font-size:0.75rem;color:#888}
+        .section-title{font-weight:600;font-size:0.95rem;color:#333;padding:0 20px;margin:16px 0 12px}
+        .user-list{padding:0 20px}
+        .user-item{border:1px solid #f0f0f0;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+        .user-item img{width:42px;height:42px;border-radius:50%}
+        .user-item .info{flex:1}
+        .user-item .info .name{font-weight:600;font-size:0.9rem;color:#222}
+        .user-item .info .meta{font-size:0.75rem;color:#888}
+        .user-item .badge-type{font-size:0.7rem;padding:3px 8px;border-radius:8px;font-weight:500}
+        .user-item .badge-type.premium{background:#fff3cd;color:#856404}
+        .user-item .badge-type.free{background:#f0f0f0;color:#666}
+        .user-item .actions{display:flex;gap:6px}
+        .user-item .actions button{width:32px;height:32px;border-radius:8px;border:1px solid #e8e8e8;background:#fff;display:flex;align-items:center;justify-content:center;font-size:0.85rem;cursor:pointer}
+        .user-item .actions button:hover{background:#f8f9fa}
+        .user-item .actions button.btn-del{color:#dc3545;border-color:#fecaca}
+        .user-item .actions button.btn-up{color:#2563eb;border-color:#bfdbfe}
+        .user-item .actions button.btn-down{color:#888;border-color:#e8e8e8}
+        .confirm-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:2000;align-items:center;justify-content:center}
+        .confirm-overlay.show{display:flex}
+        .confirm-box{background:#fff;border-radius:16px;padding:30px 24px;text-align:center;max-width:320px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.15)}
+        .confirm-box h5{font-weight:600;margin-bottom:8px;color:#222}
+        .confirm-box p{font-size:0.85rem;color:#888;margin-bottom:20px}
+        .confirm-box .btn-confirm{width:100%;padding:12px;border:none;background:#2563eb;color:#fff;border-radius:10px;font-weight:600;margin-bottom:8px}
+        .confirm-box .btn-confirm.danger{background:#dc3545}
+        .confirm-box .btn-cancel{width:100%;padding:12px;border:1px solid #e8e8e8;background:#fff;color:#333;border-radius:10px;font-weight:500}
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-admin sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="/admin/dashboard"><i class="bi bi-shield-fill me-2"></i>Admin Panel</a>
-            <a class="nav-link text-white" href="/logout"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
+    <div class="top-header">
+        <h6><i class="bi bi-shield-check me-2"></i>Admin Panel</h6>
+        <a href="/logout" class="btn-logout"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="icon blue"><i class="bi bi-people-fill"></i></div>
+            <div><div class="value"><%= totalUsers %></div><div class="label">Total Users</div></div>
         </div>
-    </nav>
-    <div class="container py-4">
-        <h3 class="fw-bold mb-4">Dashboard Overview</h3>
-        <div class="row g-3 mb-4">
-            <div class="col-6 col-lg-3">
-                <div class="card stat-card p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon bg-primary bg-opacity-10 text-primary me-3"><i class="bi bi-people-fill"></i></div>
-                        <div><h4 class="fw-bold mb-0"><%= totalUsers %></h4><small class="text-muted">Total Users</small></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="card stat-card p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon bg-warning bg-opacity-10 text-warning me-3"><i class="bi bi-star-fill"></i></div>
-                        <div><h4 class="fw-bold mb-0"><%= premiumUsers %></h4><small class="text-muted">Premium</small></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="card stat-card p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon bg-success bg-opacity-10 text-success me-3"><i class="bi bi-person-fill"></i></div>
-                        <div><h4 class="fw-bold mb-0"><%= freeUsers %></h4><small class="text-muted">Free</small></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="card stat-card p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon bg-danger bg-opacity-10 text-danger me-3"><i class="bi bi-chat-fill"></i></div>
-                        <div><h4 class="fw-bold mb-0"><%= totalMessages %></h4><small class="text-muted">Messages</small></div>
-                    </div>
-                </div>
-            </div>
+        <div class="stat-card">
+            <div class="icon yellow"><i class="bi bi-star-fill"></i></div>
+            <div><div class="value"><%= premiumUsers %></div><div class="label">Premium</div></div>
         </div>
-        <div class="card table-card">
-            <div class="card-header bg-white p-3 border-0"><h5 class="fw-bold mb-0"><i class="bi bi-people me-2"></i>Registered Users</h5></div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr><th>User</th><th>Email</th><th>Gender</th><th>Age</th><th>Type</th><th>Actions</th></tr>
-                        </thead>
-                        <tbody>
-                            <% if (users.length === 0) { %>
-                                <tr><td colspan="6" class="text-center py-4 text-muted">No users registered yet.</td></tr>
-                            <% } else { %>
-                                <% users.forEach(u => { %>
-                                <tr>
-                                    <td class="align-middle">
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://ui-avatars.com/api/?name=<%= encodeURIComponent(u.name) %>&size=35&background=e91e63&color=fff" class="rounded-circle me-2" style="width:35px;height:35px">
-                                            <strong><%= u.name %></strong>
-                                        </div>
-                                    </td>
-                                    <td class="align-middle"><%= u.email %></td>
-                                    <td class="align-middle"><%= u.gender %></td>
-                                    <td class="align-middle"><%= u.age %></td>
-                                    <td class="align-middle">
-                                        <span class="badge rounded-pill <%= u.account_type === 'premium' ? 'bg-warning text-dark' : 'bg-secondary' %>"><%= u.account_type %></span>
-                                    </td>
-                                    <td class="align-middle">
-                                        <form method="POST" action="/admin/action" class="d-inline">
-                                            <input type="hidden" name="user_id" value="<%= u.id %>">
-                                            <% if (u.account_type === 'free') { %>
-                                                <button name="action" value="upgrade" class="btn btn-sm btn-warning rounded-pill"><i class="bi bi-arrow-up-circle"></i></button>
-                                            <% } else { %>
-                                                <button name="action" value="downgrade" class="btn btn-sm btn-secondary rounded-pill"><i class="bi bi-arrow-down-circle"></i></button>
-                                            <% } %>
-                                            <button name="action" value="delete" class="btn btn-sm btn-danger rounded-pill" onclick="return confirm('Delete this user?')"><i class="bi bi-trash"></i></button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                <% }) %>
-                            <% } %>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="stat-card">
+            <div class="icon green"><i class="bi bi-person-fill"></i></div>
+            <div><div class="value"><%= freeUsers %></div><div class="label">Free</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="icon red"><i class="bi bi-chat-fill"></i></div>
+            <div><div class="value"><%= totalMessages %></div><div class="label">Messages</div></div>
         </div>
     </div>
+
+    <div class="section-title">Registered Users</div>
+
+    <div class="user-list">
+        <% if (users.length === 0) { %>
+            <div class="text-center py-4"><p class="text-muted" style="font-size:0.85rem">No users registered yet.</p></div>
+        <% } else { %>
+            <% users.forEach(u => { %>
+            <div class="user-item">
+                <img src="https://ui-avatars.com/api/?name=<%= encodeURIComponent(u.name) %>&size=42&background=e8e8e8&color=555" alt="">
+                <div class="info">
+                    <div class="name"><%= u.name %></div>
+                    <div class="meta"><%= u.email %> · <%= u.gender %> · <%= u.age %></div>
+                </div>
+                <span class="badge-type <%= u.account_type === 'premium' ? 'premium' : 'free' %>"><%= u.account_type %></span>
+                <div class="actions">
+                    <% if (u.account_type === 'free') { %>
+                        <button class="btn-up" onclick="showAdminConfirm('upgrade', <%= u.id %>, '<%= u.name %>')" title="Upgrade"><i class="bi bi-arrow-up-circle"></i></button>
+                    <% } else { %>
+                        <button class="btn-down" onclick="showAdminConfirm('downgrade', <%= u.id %>, '<%= u.name %>')" title="Downgrade"><i class="bi bi-arrow-down-circle"></i></button>
+                    <% } %>
+                    <button class="btn-del" onclick="showAdminConfirm('delete', <%= u.id %>, '<%= u.name %>')" title="Delete"><i class="bi bi-trash"></i></button>
+                </div>
+            </div>
+            <% }) %>
+        <% } %>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-box">
+            <i class="bi bi-exclamation-circle" style="font-size:2.5rem;color:#2563eb" id="confirmIcon"></i>
+            <h5 class="mt-3" id="confirmTitle">Confirm Action</h5>
+            <p id="confirmMsg">Are you sure?</p>
+            <form method="POST" action="/admin/action" id="confirmForm">
+                <input type="hidden" name="user_id" id="confirmUserId">
+                <button type="submit" name="action" id="confirmAction" value="" class="btn-confirm">Confirm</button>
+            </form>
+            <button class="btn-cancel" onclick="hideAdminConfirm()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+    function showAdminConfirm(action, userId, userName) {
+        var overlay = document.getElementById('confirmOverlay');
+        var icon = document.getElementById('confirmIcon');
+        var title = document.getElementById('confirmTitle');
+        var msg = document.getElementById('confirmMsg');
+        var btn = document.getElementById('confirmAction');
+        var uid = document.getElementById('confirmUserId');
+        uid.value = userId;
+        btn.value = action;
+        if (action === 'upgrade') {
+            icon.className = 'bi bi-star-fill';
+            icon.style.color = '#f59e0b';
+            title.textContent = 'Upgrade Account?';
+            msg.textContent = 'Upgrade ' + userName + ' to Premium? They will get access to all premium features.';
+            btn.textContent = 'Yes, Upgrade';
+            btn.className = 'btn-confirm';
+        } else if (action === 'downgrade') {
+            icon.className = 'bi bi-arrow-down-circle';
+            icon.style.color = '#6b7280';
+            title.textContent = 'Downgrade Account?';
+            msg.textContent = 'Downgrade ' + userName + ' to Free? They will lose premium features.';
+            btn.textContent = 'Yes, Downgrade';
+            btn.className = 'btn-confirm';
+        } else if (action === 'delete') {
+            icon.className = 'bi bi-trash';
+            icon.style.color = '#dc3545';
+            title.textContent = 'Delete User?';
+            msg.textContent = 'Delete ' + userName + '? This action cannot be undone.';
+            btn.textContent = 'Yes, Delete';
+            btn.className = 'btn-confirm danger';
+        }
+        overlay.classList.add('show');
+    }
+    function hideAdminConfirm(){document.getElementById('confirmOverlay').classList.remove('show')}
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
