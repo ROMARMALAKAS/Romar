@@ -1,0 +1,14 @@
+database/dating_app.db
+uploads/*.png
+uploads/*.jpg
+uploads/*.jpeg
+uploads/*.gif
+uploads/*.webp
+uploads/chat/*.png
+uploads/chat/*.jpg
+uploads/chat/*.jpeg
+uploads/chat/*.gif
+uploads/chat/*.webp
+!uploads/.gitkeep
+!uploads/chat/.gitkeep
+!database/.gitkeep
