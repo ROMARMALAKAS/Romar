@@ -23,95 +23,170 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Invalid admin credentials.';
     }
 }
-
-$pageTitle = 'Admin Login - LoveConnect';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $pageTitle ?></title>
+    <title>LoveConnect - Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Poppins', sans-serif; }
-        .auth-container {
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
             min-height: 100vh;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+        .header-section {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 30%, #3949ab 60%, #5c6bc0 100%);
+            padding: 50px 20px 80px;
+            text-align: center;
+            position: relative;
+            border-radius: 0 0 50% 50% / 0 0 15% 15%;
+        }
+        .header-section::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: white;
+            border-radius: 50% 50% 0 0;
+        }
+        .app-logo {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 50%;
+            margin: 0 auto 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            padding: 20px;
+            box-shadow: 0 8px 30px rgba(26, 35, 126, 0.3);
+            position: relative;
+            z-index: 2;
         }
-        .auth-card {
-            background: white;
-            border-radius: 25px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        .app-logo i { font-size: 2.8rem; color: #1a237e; }
+        .app-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 2;
+        }
+        .app-subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 2;
+        }
+        .form-section {
+            flex: 1;
+            padding: 30px 25px;
+            max-width: 450px;
+            margin: 0 auto;
             width: 100%;
-            max-width: 420px;
         }
-        .form-control-dating {
+        .input-group-custom {
+            position: relative;
+            margin-bottom: 18px;
+        }
+        .input-group-custom .input-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 1.2rem;
+            z-index: 3;
+        }
+        .input-group-custom .form-control {
+            padding: 16px 50px 16px 52px;
             border-radius: 12px;
-            padding: 12px 18px;
-            border: 2px solid #e0e0e0;
+            border: 2px solid #e8e8e8;
+            font-size: 1rem;
+            background: #f8f9fa;
+            transition: all 0.3s;
         }
-        .form-control-dating:focus {
-            border-color: #1a1a2e;
-            box-shadow: 0 0 0 3px rgba(26, 26, 46, 0.1);
+        .input-group-custom .form-control:focus {
+            border-color: #1a237e;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(26, 35, 126, 0.08);
         }
-        .btn-admin {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border: none;
-            color: white;
-            font-weight: 600;
-            border-radius: 25px;
-            padding: 12px 30px;
+        .btn-admin-login {
             width: 100%;
-            transition: all 0.3s ease;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            background: linear-gradient(135deg, #1a237e, #3949ab);
+            color: white;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(26, 35, 126, 0.3);
         }
-        .btn-admin:hover {
+        .btn-admin-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(26, 26, 46, 0.4);
+            box-shadow: 0 6px 25px rgba(26, 35, 126, 0.4);
             color: white;
         }
+        .footer-section {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            color: white;
+            margin-top: auto;
+        }
+        .footer-section p { margin: 0; font-size: 0.85rem; opacity: 0.9; }
+        .footer-section a { color: white; text-decoration: none; }
+        .alert { border-radius: 12px; border: none; }
     </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="text-center mb-4">
-                <i class="bi bi-shield-lock-fill fs-1" style="color: #1a1a2e;"></i>
-                <h2 class="fw-bold mt-2">Admin Panel</h2>
-                <p class="text-muted">Authorized access only</p>
-            </div>
-            
-            <?php if ($error): ?>
-                <div class="alert alert-danger rounded-3">
-                    <i class="bi bi-exclamation-circle me-2"></i><?= $error ?>
-                </div>
-            <?php endif; ?>
-            
-            <form method="POST">
-                <div class="mb-3">
-                    <label class="form-label fw-500">Email</label>
-                    <input type="text" name="email" class="form-control form-control-dating" placeholder="Admin email" required>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label fw-500">Password</label>
-                    <input type="password" name="password" class="form-control form-control-dating" placeholder="Admin password" required>
-                </div>
-                <button type="submit" class="btn btn-admin">
-                    <i class="bi bi-shield-check me-2"></i>Admin Login
-                </button>
-                <p class="text-center mt-3 mb-0">
-                    <a href="login.php" class="text-decoration-none text-muted">Back to User Login</a>
-                </p>
-            </form>
+    <div class="header-section">
+        <div class="app-logo">
+            <i class="bi bi-shield-lock-fill"></i>
         </div>
+        <h1 class="app-title">ADMIN PANEL</h1>
+        <p class="app-subtitle">Authorized Access Only</p>
     </div>
+    
+    <div class="form-section">
+        <?php if ($error): ?>
+            <div class="alert alert-danger"><i class="bi bi-exclamation-circle me-2"></i><?= $error ?></div>
+        <?php endif; ?>
+        
+        <form method="POST">
+            <div class="input-group-custom">
+                <i class="bi bi-person-fill input-icon"></i>
+                <input type="text" name="email" class="form-control" placeholder="Admin Email" required>
+            </div>
+            <div class="input-group-custom">
+                <i class="bi bi-lock-fill input-icon"></i>
+                <input type="password" name="password" class="form-control" placeholder="Admin Password" required>
+            </div>
+            <button type="submit" class="btn btn-admin-login">
+                <i class="bi bi-shield-check me-2"></i>Admin Login
+            </button>
+            <a href="login.php" class="btn btn-outline-secondary w-100 rounded-pill py-3">
+                <i class="bi bi-arrow-left me-2"></i>Back to User Login
+            </a>
+        </form>
+    </div>
+    
+    <div class="footer-section">
+        <p><a href="#">Privacy Policy</a> • <a href="#">Terms of Use</a></p>
+        <p class="mt-1">Version 1.0.0</p>
+    </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

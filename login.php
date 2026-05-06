@@ -33,113 +33,304 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
-$pageTitle = 'Login - LoveConnect';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $pageTitle ?></title>
+    <title>LoveConnect - Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Poppins', sans-serif; }
-        .auth-container {
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
             min-height: 100vh;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header-section {
+            background: linear-gradient(135deg, #e91e63 0%, #ff5252 30%, #ff8a80 60%, #fce4ec 100%);
+            padding: 50px 20px 80px;
+            text-align: center;
+            position: relative;
+            border-radius: 0 0 50% 50% / 0 0 15% 15%;
+        }
+        
+        .header-section::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: white;
+            border-radius: 50% 50% 0 0;
+        }
+        
+        .app-logo {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 50%;
+            margin: 0 auto 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
+            box-shadow: 0 8px 30px rgba(233, 30, 99, 0.3);
+            position: relative;
+            z-index: 2;
         }
-        .auth-card {
-            background: white;
-            border-radius: 25px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        
+        .app-logo i {
+            font-size: 2.8rem;
+            color: #e91e63;
+        }
+        
+        .app-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .app-subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.9rem;
+            font-weight: 400;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .form-section {
+            flex: 1;
+            padding: 30px 25px;
+            max-width: 450px;
+            margin: 0 auto;
             width: 100%;
-            max-width: 420px;
         }
-        .form-control-dating {
+        
+        .input-group-custom {
+            position: relative;
+            margin-bottom: 18px;
+        }
+        
+        .input-group-custom .input-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 1.2rem;
+            z-index: 3;
+        }
+        
+        .input-group-custom .form-control {
+            padding: 16px 50px 16px 52px;
             border-radius: 12px;
-            padding: 12px 18px;
-            border: 2px solid #e0e0e0;
-            transition: all 0.3s ease;
+            border: 2px solid #e8e8e8;
+            font-size: 1rem;
+            background: #f8f9fa;
+            transition: all 0.3s;
         }
-        .form-control-dating:focus {
-            border-color: #764ba2;
-            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1);
+        
+        .input-group-custom .form-control:focus {
+            border-color: #e91e63;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(233, 30, 99, 0.08);
         }
-        .btn-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            color: white;
-            font-weight: 600;
-            border-radius: 25px;
-            padding: 12px 30px;
-            transition: all 0.3s ease;
+        
+        .input-group-custom .form-control::placeholder {
+            color: #aaa;
+        }
+        
+        .input-group-custom .toggle-pass {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            cursor: pointer;
+            font-size: 1.2rem;
+            z-index: 3;
+        }
+        
+        .remember-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .remember-row .form-check-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .remember-row a {
+            color: #e91e63;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .btn-login {
             width: 100%;
-        }
-        .btn-gradient:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            background: linear-gradient(135deg, #e91e63, #ff5252);
             color: white;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(233, 30, 99, 0.3);
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(233, 30, 99, 0.4);
+            color: white;
+        }
+        
+        .btn-register {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            background: linear-gradient(135deg, #4caf50, #66bb6a);
+            color: white;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(76, 175, 80, 0.4);
+            color: white;
+        }
+        
+        .footer-section {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #e91e63, #c2185b);
+            color: white;
+            margin-top: auto;
+        }
+        
+        .footer-section p {
+            margin: 0;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .footer-section a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .help-text {
+            text-align: center;
+            margin-top: 30px;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        .help-text a {
+            color: #e91e63;
+            text-decoration: none;
+            font-weight: 600;
+            display: block;
+            margin-top: 5px;
+        }
+        
+        .alert {
+            border-radius: 12px;
+            border: none;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="text-center mb-4">
-                <i class="bi bi-heart-fill text-danger fs-1"></i>
-                <h2 class="fw-bold mt-2">Welcome Back</h2>
-                <p class="text-muted">Sign in to continue your journey</p>
+    <!-- Header with Logo -->
+    <div class="header-section">
+        <div class="app-logo">
+            <i class="bi bi-heart-fill"></i>
+        </div>
+        <h1 class="app-title">LOVECONNECT</h1>
+        <p class="app-subtitle">Find Your Perfect Match</p>
+    </div>
+    
+    <!-- Form Section -->
+    <div class="form-section">
+        <?php if ($error): ?>
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-circle me-2"></i><?= $error ?>
+            </div>
+        <?php endif; ?>
+        
+        <form method="POST">
+            <div class="input-group-custom">
+                <i class="bi bi-envelope-fill input-icon"></i>
+                <input type="text" name="email" class="form-control" placeholder="Email or Username" required value="<?= $_POST['email'] ?? '' ?>">
             </div>
             
-            <?php if ($error): ?>
-                <div class="alert alert-danger alert-dismissible fade show rounded-3" role="alert">
-                    <i class="bi bi-exclamation-circle me-2"></i><?= $error ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
+            <div class="input-group-custom">
+                <i class="bi bi-lock-fill input-icon"></i>
+                <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
+                <i class="bi bi-eye toggle-pass" onclick="togglePassword()"></i>
+            </div>
             
-            <form method="POST">
-                <div class="mb-3">
-                    <label class="form-label fw-500">Email</label>
-                    <div class="input-group">
-                        <span class="input-group-text rounded-start-3 border-end-0" style="border: 2px solid #e0e0e0; border-right: none;">
-                            <i class="bi bi-envelope text-muted"></i>
-                        </span>
-                        <input type="text" name="email" class="form-control form-control-dating border-start-0" placeholder="Enter your email" required value="<?= $_POST['email'] ?? '' ?>">
-                    </div>
+            <div class="remember-row">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="remember">
+                    <label class="form-check-label" for="remember">Remember me</label>
                 </div>
-                
-                <div class="mb-4">
-                    <label class="form-label fw-500">Password</label>
-                    <div class="input-group">
-                        <span class="input-group-text rounded-start-3 border-end-0" style="border: 2px solid #e0e0e0; border-right: none;">
-                            <i class="bi bi-lock text-muted"></i>
-                        </span>
-                        <input type="password" name="password" class="form-control form-control-dating border-start-0" placeholder="Enter your password" required>
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn btn-gradient">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
-                </button>
-                
-                <p class="text-center mt-3 mb-0">
-                    Don't have an account? <a href="register.php" class="text-decoration-none" style="color: #764ba2;">Sign Up</a>
-                </p>
-                <p class="text-center mt-2 mb-0">
-                    <a href="admin_login.php" class="text-decoration-none text-muted small">Admin Login</a>
-                </p>
-            </form>
+                <a href="#">Forgot Password?</a>
+            </div>
+            
+            <button type="submit" class="btn btn-login">Login</button>
+            <a href="register.php" class="btn btn-register">Register</a>
+        </form>
+        
+        <div class="help-text">
+            Need help accessing your account?
+            <a href="admin_login.php">Contact Admin</a>
         </div>
     </div>
+    
+    <!-- Footer -->
+    <div class="footer-section">
+        <p><a href="#">Privacy Policy</a> • <a href="#">Terms of Use</a></p>
+        <p class="mt-1">Version 1.0.0</p>
+    </div>
+    
+    <script>
+        function togglePassword() {
+            var pwd = document.getElementById('password');
+            var icon = document.querySelector('.toggle-pass');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                pwd.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

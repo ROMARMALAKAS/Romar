@@ -21,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $latitude = floatval($_POST['latitude'] ?? 0);
     $longitude = floatval($_POST['longitude'] ?? 0);
     
-    // Validation
     if (empty($name) || empty($email) || empty($password) || empty($gender) || $age < 18) {
         $error = 'Please fill in all required fields. You must be 18 or older.';
     } elseif ($password !== $confirm_password) {
@@ -31,13 +30,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $db = getDB();
         
-        // Check if email exists
         $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
         $stmt->execute([$email]);
         if ($stmt->fetch()) {
             $error = 'Email already registered.';
         } else {
-            // Handle profile photo upload
             $photoFilename = 'default.png';
             if (isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] === UPLOAD_ERR_OK) {
                 $upload = uploadImage($_FILES['profile_photo']);
@@ -58,150 +55,299 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
-$pageTitle = 'Register - LoveConnect';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $pageTitle ?></title>
+    <title>LoveConnect - Register</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Poppins', sans-serif; }
-        .auth-container {
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
             min-height: 100vh;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header-section {
+            background: linear-gradient(135deg, #e91e63 0%, #ff5252 30%, #ff8a80 60%, #fce4ec 100%);
+            padding: 40px 20px 70px;
+            text-align: center;
+            position: relative;
+            border-radius: 0 0 50% 50% / 0 0 15% 15%;
+        }
+        
+        .header-section::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: white;
+            border-radius: 50% 50% 0 0;
+        }
+        
+        .app-logo {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            margin: 0 auto 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
+            box-shadow: 0 8px 30px rgba(233, 30, 99, 0.3);
+            position: relative;
+            z-index: 2;
         }
-        .auth-card {
-            background: white;
-            border-radius: 25px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            width: 100%;
+        
+        .app-logo i {
+            font-size: 2.2rem;
+            color: #e91e63;
+        }
+        
+        .app-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .app-subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.85rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .form-section {
+            flex: 1;
+            padding: 20px 25px 30px;
             max-width: 500px;
-        }
-        .form-control-dating {
-            border-radius: 12px;
-            padding: 12px 18px;
-            border: 2px solid #e0e0e0;
-            transition: all 0.3s ease;
-        }
-        .form-control-dating:focus {
-            border-color: #764ba2;
-            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1);
-        }
-        .btn-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            color: white;
-            font-weight: 600;
-            border-radius: 25px;
-            padding: 12px 30px;
-            transition: all 0.3s ease;
+            margin: 0 auto;
             width: 100%;
         }
-        .btn-gradient:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        
+        .input-group-custom {
+            position: relative;
+            margin-bottom: 14px;
+        }
+        
+        .input-group-custom .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 1.1rem;
+            z-index: 3;
+        }
+        
+        .input-group-custom .form-control,
+        .input-group-custom .form-select {
+            padding: 14px 18px 14px 48px;
+            border-radius: 12px;
+            border: 2px solid #e8e8e8;
+            font-size: 0.95rem;
+            background: #f8f9fa;
+            transition: all 0.3s;
+        }
+        
+        .input-group-custom .form-control:focus,
+        .input-group-custom .form-select:focus {
+            border-color: #e91e63;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(233, 30, 99, 0.08);
+        }
+        
+        .input-group-custom .form-control::placeholder {
+            color: #aaa;
+        }
+        
+        .btn-register-submit {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            background: linear-gradient(135deg, #4caf50, #66bb6a);
             color: white;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-register-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(76, 175, 80, 0.4);
+            color: white;
+        }
+        
+        .btn-back-login {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: 2px solid #e91e63;
+            background: white;
+            color: #e91e63;
+            transition: all 0.3s;
+        }
+        
+        .btn-back-login:hover {
+            background: #e91e63;
+            color: white;
+        }
+        
+        .section-title {
+            font-weight: 700;
+            color: #333;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            margin-top: 15px;
+        }
+        
+        .footer-section {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #e91e63, #c2185b);
+            color: white;
+            margin-top: auto;
+        }
+        
+        .footer-section p {
+            margin: 0;
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .alert { border-radius: 12px; border: none; font-size: 0.9rem; }
+        
+        .photo-upload {
+            border: 2px dashed #e8e8e8;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+        
+        .photo-upload:hover {
+            border-color: #e91e63;
+            background: #fce4ec;
         }
     </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="text-center mb-4">
-                <i class="bi bi-heart-fill text-danger fs-1"></i>
-                <h2 class="fw-bold mt-2">Create Account</h2>
-                <p class="text-muted">Join LoveConnect and find your match</p>
+    <!-- Header -->
+    <div class="header-section">
+        <div class="app-logo">
+            <i class="bi bi-heart-fill"></i>
+        </div>
+        <h1 class="app-title">LOVECONNECT</h1>
+        <p class="app-subtitle">Create Your Account</p>
+    </div>
+    
+    <!-- Form -->
+    <div class="form-section">
+        <?php if ($error): ?>
+            <div class="alert alert-danger"><i class="bi bi-exclamation-circle me-2"></i><?= $error ?></div>
+        <?php endif; ?>
+        <?php if ($success): ?>
+            <div class="alert alert-success"><i class="bi bi-check-circle me-2"></i><?= $success ?> <a href="login.php">Login now</a></div>
+        <?php endif; ?>
+        
+        <form method="POST" enctype="multipart/form-data">
+            <p class="section-title"><i class="bi bi-person me-1"></i> Personal Info</p>
+            
+            <div class="input-group-custom">
+                <i class="bi bi-person-fill input-icon"></i>
+                <input type="text" name="name" class="form-control" placeholder="Full Name" required value="<?= $_POST['name'] ?? '' ?>">
             </div>
             
-            <?php if ($error): ?>
-                <div class="alert alert-danger alert-dismissible fade show rounded-3" role="alert">
-                    <i class="bi bi-exclamation-circle me-2"></i><?= $error ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
+            <div class="input-group-custom">
+                <i class="bi bi-envelope-fill input-icon"></i>
+                <input type="email" name="email" class="form-control" placeholder="Email Address" required value="<?= $_POST['email'] ?? '' ?>">
+            </div>
             
-            <?php if ($success): ?>
-                <div class="alert alert-success alert-dismissible fade show rounded-3" role="alert">
-                    <i class="bi bi-check-circle me-2"></i><?= $success ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
-            
-            <form method="POST" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <label class="form-label fw-500">Full Name</label>
-                    <input type="text" name="name" class="form-control form-control-dating" placeholder="Enter your name" required value="<?= $_POST['name'] ?? '' ?>">
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label fw-500">Email</label>
-                    <input type="email" name="email" class="form-control form-control-dating" placeholder="Enter your email" required value="<?= $_POST['email'] ?? '' ?>">
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-500">Password</label>
-                        <input type="password" name="password" class="form-control form-control-dating" placeholder="Min 6 characters" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-500">Confirm Password</label>
-                        <input type="password" name="confirm_password" class="form-control form-control-dating" placeholder="Repeat password" required>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-500">Gender</label>
-                        <select name="gender" class="form-select form-control-dating" required>
-                            <option value="">Select gender</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="other">Other</option>
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="input-group-custom">
+                        <i class="bi bi-gender-ambiguous input-icon"></i>
+                        <select name="gender" class="form-select" required style="padding-left: 48px;">
+                            <option value="">Gender</option>
+                            <option value="male" <?= ($_POST['gender'] ?? '') === 'male' ? 'selected' : '' ?>>Male</option>
+                            <option value="female" <?= ($_POST['gender'] ?? '') === 'female' ? 'selected' : '' ?>>Female</option>
+                            <option value="other" <?= ($_POST['gender'] ?? '') === 'other' ? 'selected' : '' ?>>Other</option>
                         </select>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-500">Age</label>
-                        <input type="number" name="age" class="form-control form-control-dating" min="18" max="100" placeholder="18+" required value="<?= $_POST['age'] ?? '' ?>">
+                </div>
+                <div class="col-6">
+                    <div class="input-group-custom">
+                        <i class="bi bi-calendar-fill input-icon"></i>
+                        <input type="number" name="age" class="form-control" placeholder="Age (18+)" min="18" max="100" required value="<?= $_POST['age'] ?? '' ?>">
                     </div>
                 </div>
-                
-                <div class="mb-3">
-                    <label class="form-label fw-500">Bio</label>
-                    <textarea name="bio" class="form-control form-control-dating" rows="3" placeholder="Tell us about yourself..."><?= $_POST['bio'] ?? '' ?></textarea>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label fw-500">Profile Photo</label>
-                    <input type="file" name="profile_photo" class="form-control form-control-dating" accept="image/*">
-                </div>
-                
-                <input type="hidden" name="latitude" id="latitude">
-                <input type="hidden" name="longitude" id="longitude">
-                
-                <button type="submit" class="btn btn-gradient mt-3">
-                    <i class="bi bi-heart-fill me-2"></i>Create Account
-                </button>
-                
-                <p class="text-center mt-3 mb-0">
-                    Already have an account? <a href="login.php" class="text-decoration-none" style="color: #764ba2;">Sign In</a>
-                </p>
-            </form>
-        </div>
+            </div>
+            
+            <div class="input-group-custom">
+                <i class="bi bi-chat-quote-fill input-icon" style="top: 30%;"></i>
+                <textarea name="bio" class="form-control" placeholder="Tell us about yourself..." rows="2" style="padding-top: 14px;"><?= $_POST['bio'] ?? '' ?></textarea>
+            </div>
+            
+            <p class="section-title"><i class="bi bi-shield-lock me-1"></i> Security</p>
+            
+            <div class="input-group-custom">
+                <i class="bi bi-lock-fill input-icon"></i>
+                <input type="password" name="password" class="form-control" placeholder="Password (min 6 chars)" required>
+            </div>
+            
+            <div class="input-group-custom">
+                <i class="bi bi-lock-fill input-icon"></i>
+                <input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" required>
+            </div>
+            
+            <p class="section-title"><i class="bi bi-camera me-1"></i> Profile Photo</p>
+            
+            <div class="photo-upload mb-3" onclick="document.getElementById('photoInput').click();">
+                <i class="bi bi-camera-fill fs-3 text-muted"></i>
+                <p class="mb-0 text-muted small" id="photoLabel">Tap to upload your photo</p>
+                <input type="file" id="photoInput" name="profile_photo" accept="image/*" class="d-none" onchange="document.getElementById('photoLabel').textContent = this.files[0].name;">
+            </div>
+            
+            <input type="hidden" name="latitude" id="latitude">
+            <input type="hidden" name="longitude" id="longitude">
+            
+            <button type="submit" class="btn btn-register-submit mt-2">
+                <i class="bi bi-heart-fill me-2"></i>Create Account
+            </button>
+            <a href="login.php" class="btn btn-back-login">
+                <i class="bi bi-arrow-left me-2"></i>Back to Login
+            </a>
+        </form>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer-section">
+        <p>By registering, you agree to our Terms of Use</p>
+        <p class="mt-1">Version 1.0.0</p>
     </div>
     
     <script>
-        // Get user location
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
                 document.getElementById('latitude').value = position.coords.latitude;
