@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - LoveConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#fff;margin:0;padding-bottom:70px}
+        .top-header{background:#fff;padding:16px 20px;border-bottom:1px solid #f0f0f0;position:sticky;top:0;z-index:100}
+        .top-header h6{margin:0;font-weight:600;color:#333}
+        .top-header small{color:#888;font-size:0.8rem}
+        .greeting-section{padding:20px;background:#fff}
+        .greeting-section h5{font-weight:700;color:#222;margin-bottom:4px}
+        .greeting-section p{color:#888;font-size:0.85rem;margin:0}
+        .user-badge{font-size:0.7rem;padding:4px 10px;border-radius:12px;font-weight:500}
+        .user-badge.premium{background:#fff3cd;color:#856404}
+        .user-badge.free{background:#f0f0f0;color:#666}
+        .section-title{font-weight:600;font-size:0.95rem;color:#333;padding:0 20px;margin-bottom:12px}
+        .profiles-scroll{padding:0 20px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+        .profiles-scroll::-webkit-scrollbar{display:none}
+        .profile-card{display:inline-block;width:160px;background:#fff;border-radius:16px;border:1px solid #f0f0f0;overflow:hidden;margin-right:12px;white-space:normal;vertical-align:top;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+        .profile-card img{width:100%;height:140px;object-fit:cover}
+        .profile-card .info{padding:10px}
+        .profile-card .info h6{font-size:0.85rem;font-weight:600;margin-bottom:2px;color:#222}
+        .profile-card .info small{color:#888;font-size:0.75rem}
+        .profile-card .distance{font-size:0.7rem;color:#e91e63;font-weight:500;margin-top:4px}
+        .profile-card .btn-msg{display:block;width:100%;padding:8px;background:#f8f9fa;border:none;border-top:1px solid #f0f0f0;color:#333;font-size:0.8rem;font-weight:500;cursor:pointer;transition:background 0.2s}
+        .profile-card .btn-msg:hover{background:#e8e8e8}
+        .profile-grid{padding:0 20px}
+        .profile-grid .card-item{background:#fff;border-radius:12px;border:1px solid #f0f0f0;padding:14px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+        .profile-grid .card-item img{width:50px;height:50px;border-radius:50%;object-fit:cover}
+        .profile-grid .card-item .info{flex:1}
+        .profile-grid .card-item .info h6{font-size:0.9rem;font-weight:600;margin-bottom:2px;color:#222}
+        .profile-grid .card-item .info small{color:#888;font-size:0.8rem}
+        .profile-grid .card-item .btn-action{padding:8px 16px;background:#fff;border:1px solid #e0e0e0;border-radius:20px;font-size:0.8rem;font-weight:500;color:#333;text-decoration:none;transition:all 0.2s}
+        .profile-grid .card-item .btn-action:hover{background:#f8f9fa;border-color:#ccc}
+        .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #f0f0f0;display:flex;justify-content:space-around;align-items:center;padding:8px 0 12px;z-index:1000}
+        .bottom-nav a{display:flex;flex-direction:column;align-items:center;text-decoration:none;color:#999;font-size:0.7rem;font-weight:500;padding:4px 12px;border-radius:12px;transition:all 0.2s}
+        .bottom-nav a.active{color:#2563eb;background:#eff6ff}
+        .bottom-nav a i{font-size:1.3rem;margin-bottom:2px}
+    </style>
+</head>
+<body>
+    <div class="top-header d-flex justify-content-between align-items-center">
+        <div>
+            <h6>Good day, <%= currentUser.name.split(' ')[0].toLowerCase() %></h6>
+            <small>Find someone special near you</small>
+        </div>
+        <span class="user-badge <%= currentUser.account_type === 'premium' ? 'premium' : 'free' %>">
+            <i class="bi <%= currentUser.account_type === 'premium' ? 'bi-star-fill' : 'bi-person' %> me-1"></i><%= currentUser.account_type === 'premium' ? 'Premium' : 'Free' %>
+        </span>
+    </div>
+
+    <div class="greeting-section">
+        <h5>Discover People</h5>
+        <p>Swipe right if you like them</p>
+    </div>
+
+    <% if (users.length === 0) { %>
+        <div class="text-center py-5 px-3"><i class="bi bi-people" style="font-size:2.5rem;color:#ccc"></i><p class="text-muted mt-2">No users found yet</p></div>
+    <% } else { %>
+        <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center px-3 mb-2">
+                <span class="section-title" style="padding:0">Nearby</span>
+                <small class="text-muted"><%= users.length %> people</small>
+            </div>
+            <div class="profile-grid">
+                <% users.forEach(u => { %>
+                <div class="card-item">
+                    <img src="https://ui-avatars.com/api/?name=<%= encodeURIComponent(u.name) %>&size=50&background=e8e8e8&color=555&bold=true" alt="<%= u.name %>">
+                    <div class="info">
+                        <h6><%= u.name %>, <%= u.age %></h6>
+                        <small><%= u.gender.charAt(0).toUpperCase() + u.gender.slice(1) %> · <%= u.bio ? u.bio.substring(0, 40) : 'No bio' %><%= u.bio && u.bio.length > 40 ? '...' : '' %></small>
+                        <% if (u.distance) { %>
+                            <div class="distance"><i class="bi bi-geo-alt"></i> <%= u.distance %> km away</div>
+                        <% } else { %>
+                            <div class="distance"><i class="bi bi-geo-alt"></i> Nearby</div>
+                        <% } %>
+                    </div>
+                    <a href="/chat?user=<%= u.id %>" class="btn-action"><i class="bi bi-chat-dots me-1"></i>Chat</a>
+                </div>
+                <% }) %>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="/dashboard" class="active"><i class="bi bi-house-fill"></i>Home</a>
+        <a href="/upgrade"><i class="bi bi-plus-circle"></i>Upgrade</a>
+        <a href="/profile"><i class="bi bi-clock-history"></i>Profile</a>
+        <a href="/chat"><i class="bi bi-chat-dots"></i>Chats</a>
+        <a href="/profile"><i class="bi bi-person-circle"></i>Account</a>
+    </nav>
+
+    <script>
+        if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){fetch('/update-location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({latitude:p.coords.latitude,longitude:p.coords.longitude})})})}
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
